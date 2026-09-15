@@ -584,11 +584,10 @@
     function render(items){
       board.innerHTML = '';
       var isNarrow = window.innerWidth <= 640;
-      var cellW = 210, cellH = 76;
       var boardW = board.clientWidth || 700;
-      var cols = Math.max(1, Math.floor(boardW / cellW));
+      var gapX = 18, gapY = 18;
 
-      items.forEach(function(item, i){
+      var els = items.map(function(item, i){
         var el = document.createElement('span');
         el.className = 'sticker' + (item.done ? '' : ' pending');
 
@@ -601,21 +600,32 @@
         el.appendChild(check);
         el.appendChild(label);
 
-        if (!isNarrow && !reduce){
-          var col = i % cols, row = Math.floor(i / cols);
-          var jitterX = (seeded(i, 1) - 0.5) * 26;
-          var jitterY = (seeded(i, 2) - 0.5) * 18;
-          var rot = (seeded(i, 3) - 0.5) * 16;
-          el.style.setProperty('--x', (col * cellW + jitterX) + 'px');
-          el.style.setProperty('--y', (row * cellH + jitterY) + 'px');
-          el.style.setProperty('--rot', rot + 'deg');
-        }
+        if (!isNarrow && !reduce) el.style.visibility = 'hidden';
         board.appendChild(el);
+        return el;
       });
 
       if (!isNarrow && !reduce){
-        var rows = Math.ceil(items.length / cols);
-        board.style.height = (rows * cellH + 50) + 'px';
+        // Pack left-to-right, wrapping to a new row based on each
+        // sticker's real measured width so long labels can't overlap.
+        var rowX = 0, rowY = 0, rowH = 0;
+        els.forEach(function(el, i){
+          var w = el.offsetWidth, h = el.offsetHeight;
+          if (rowX > 0 && rowX + w > boardW){
+            rowY += rowH + gapY;
+            rowX = 0;
+            rowH = 0;
+          }
+          var jitterY = (seeded(i, 2) - 0.5) * 10;
+          var rot = (seeded(i, 3) - 0.5) * 14;
+          el.style.setProperty('--x', rowX + 'px');
+          el.style.setProperty('--y', (rowY + jitterY) + 'px');
+          el.style.setProperty('--rot', rot + 'deg');
+          el.style.visibility = 'visible';
+          rowX += w + gapX;
+          rowH = Math.max(rowH, h);
+        });
+        board.style.height = (rowY + rowH + 30) + 'px';
       } else {
         board.style.height = 'auto';
       }
