@@ -621,7 +621,7 @@
       }
     }
 
-    fetch('checklist.csv')
+    fetch('checklist.csv?v=' + Date.now(), { cache: 'no-store' })
       .then(function(r){ return r.text(); })
       .then(function(text){
         var items = parseCSV(text);
