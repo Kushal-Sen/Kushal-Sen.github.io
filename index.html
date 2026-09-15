@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kushal Sen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #120A2A;
+    --bg-2: #180F35;
+    --pink: #FF5DA2;
+    --violet: #8B6CFF;
+    --cyan: #3FD9E8;
+    --gold: #FFCA5C;
+    --ink: #F6F3FF;
+    --ink-dim: #B9AFE0;
+    --ink-faint: #7C72A8;
+    --card: rgba(255,255,255,0.06);
+    --card-border: rgba(255,255,255,0.14);
+    --radius-lg: 28px;
+    --radius-md: 16px;
+    --radius-pill: 999px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Sora', system-ui, -apple-system, Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: 0 24px;
+    position: relative;
+  }
+
+  h1, h2, .display{
+    font-family: 'Fredoka', system-ui, sans-serif;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  .mono{
+    font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  }
+
+  /* ---- ambient gradient field ---- */
+  .field{
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 70% 60% at 20% 15%, rgba(139,108,255,0.35), transparent 60%),
+      radial-gradient(ellipse 60% 55% at 85% 10%, rgba(255,93,162,0.28), transparent 60%),
+      radial-gradient(ellipse 65% 60% at 75% 85%, rgba(63,217,232,0.22), transparent 60%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  }
+  .blob{
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.55;
+    will-change: transform;
+  }
+  .blob-1{ width: 420px; height: 420px; left: -120px; top: -80px; background: var(--violet); animation: drift1 22s ease-in-out infinite; }
+  .blob-2{ width: 380px; height: 380px; right: -100px; top: 60px; background: var(--pink); animation: drift2 26s ease-in-out infinite; }
+  .blob-3{ width: 340px; height: 340px; right: 10%; bottom: -140px; background: var(--cyan); animation: drift3 30s ease-in-out infinite; }
+
+  @keyframes drift1{
+    0%,100%{ transform: translate(0,0) scale(1); }
+    50%{ transform: translate(60px,40px) scale(1.08); }
+  }
+  @keyframes drift2{
+    0%,100%{ transform: translate(0,0) scale(1); }
+    50%{ transform: translate(-50px,50px) scale(1.05); }
+  }
+  @keyframes drift3{
+    0%,100%{ transform: translate(0,0) scale(1); }
+    50%{ transform: translate(-40px,-40px) scale(1.1); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .blob{ animation: none !important; }
+  }
+
+  /* ---- layout shell ---- */
+  main{
+    max-width: 780px;
+    margin: 0 auto;
+    padding-top: max(72px, env(safe-area-inset-top, 0px));
+    padding-bottom: 56px;
+  }
+
+  /* ---- hero ---- */
+  .hero-top{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .avatar-ring{
+    flex: 0 0 auto;
+    display: block;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, var(--pink), var(--violet) 55%, var(--cyan));
+  }
+  .avatar-ring img{
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--bg);
+  }
+  .whoami{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    color: var(--cyan);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+  .whoami .caret{
+    display: inline-block;
+    width: 7px; height: 15px;
+    background: var(--cyan);
+    animation: blink 1.1s step-end infinite;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .whoami .caret{ animation: none; opacity: 0.8; }
+  }
+  @keyframes blink{ 0%,49%{opacity:1;} 50%,100%{opacity:0;} }
+
+  h1.name{
+    margin: 22px 0 10px;
+    font-size: clamp(42px, 9vw, 76px);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    background: linear-gradient(100deg, var(--ink) 30%, var(--cyan) 65%, var(--pink) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  p.headline{
+    margin: 0 0 40px;
+    max-width: 46ch;
+    font-size: clamp(17px, 2.4vw, 20px);
+    line-height: 1.55;
+    color: var(--ink-dim);
+  }
+  p.headline strong{ color: var(--ink); font-weight: 600; }
+
+  /* ---- about card ---- */
+  .card{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 36px clamp(22px, 4vw, 44px);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    transition: transform 0.15s ease-out;
+    transform-style: preserve-3d;
+  }
+
+  .eyebrow{
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 14px;
+  }
+
+  .card h2{
+    margin: 0 0 18px;
+    font-size: clamp(24px, 4vw, 30px);
+    color: var(--ink);
+  }
+
+  .card p{
+    margin: 0 0 22px;
+    max-width: 62ch;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--ink-dim);
+  }
+  .card p:last-of-type{ margin-bottom: 0; }
+
+  .tags{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 26px;
+  }
+  .tag{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: var(--radius-pill);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--card-border);
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  /* ---- interests ---- */
+  .interest-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+    margin-top: 6px;
+  }
+  .interest-item{
+    padding: 20px;
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--card-border);
+  }
+  .interest-item .ico{
+    font-size: 24px;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .interest-item h3{
+    font-family: 'Fredoka', system-ui, sans-serif;
+    font-weight: 600;
+    margin: 0 0 6px;
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .interest-item p{
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+  }
+
+  /* ---- gallery ---- */
+  .gallery-head{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 34px 0 14px;
+  }
+  .gallery-head h3{
+    font-family: 'Fredoka', system-ui, sans-serif;
+    font-weight: 600;
+    margin: 0;
+    font-size: 18px;
+    color: var(--ink);
+  }
+  .gallery-head span{
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  .gallery{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+  }
+  .frame{
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+    border: 1.5px dashed var(--card-border);
+    background: linear-gradient(135deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--ink-faint);
+    font-size: 12px;
+    text-align: center;
+  }
+  .frame .glyph{ font-size: 20px; opacity: 0.8; }
+  .frame.filled{
+    border-style: solid;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .frame.filled img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+  .frame.filled:hover img{ transform: scale(1.06); }
+
+  /* ---- footer ---- */
+  footer{
+    margin-top: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 1px solid var(--card-border);
+  }
+  footer .status{
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  footer .status .dot{
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--gold);
+    margin-right: 8px;
+    box-shadow: 0 0 0 3px rgba(255,202,92,0.18);
+  }
+  footer a{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink-dim);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+  }
+  footer a:hover, footer a:focus-visible{
+    color: var(--ink);
+    background: rgba(255,255,255,0.06);
+  }
+  footer a:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  @media (max-width: 520px){
+    main{ padding-top: max(56px, env(safe-area-inset-top, 0px)); }
+    .card{ padding: 28px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="field">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="hero-top">
+      <span class="avatar-ring"><img src="images/profile/kushal.jpg" alt="Kushal Sen, coffee in hand, with a hazy hillside town in the background"></span>
+      <span class="whoami mono">$ whoami<span class="caret"></span></span>
+    </div>
+    <h1 class="name">Kushal Sen</h1>
+    <p class="headline">A decade at Microsoft, now building AI systems <strong>on my own terms.</strong></p>
+  </section>
+
+  <section class="card" id="about">
+    <p class="eyebrow">About</p>
+    <h2>Currently building</h2>
+    <p>I'm Kushal — I spent about a decade at Microsoft building things for Dynamics 365, and these days I mostly do independent architecture work in AI and ML: LLM pipelines, vector search, agentic systems. A few climate-tech and startup folks let me poke around their backends.</p>
+    <p>Father to Adrisuta, who calms me when I throw a tantrum, and also secretly completes my coding assignments.</p>
+    <p>When I'm not at a keyboard, I'm probably mid-set somewhere, chasing PRs of the non-pull-request kind.</p>
+    <div class="tags">
+      <span class="tag">🧠 LLM &amp; agentic AI</span>
+      <span class="tag">⚙️ C#/.NET &amp; Azure</span>
+      <span class="tag">📊 ML at scale</span>
+      <span class="tag">🔍 Vector search</span>
+      <span class="tag">🏋️ Training plans</span>
+    </div>
+  </section>
+
+  <section class="card" id="beyond">
+    <p class="eyebrow">Also into</p>
+    <h2>When I'm not shipping code</h2>
+    <p>A few things I'm just as likely to be found doing.</p>
+    <div class="interest-grid">
+      <div class="interest-item">
+        <span class="ico">🎤</span>
+        <h3>Teaching &amp; new tech</h3>
+        <p>I love explaining new tech to anyone who'll sit still long enough. Comes from mentoring a bunch of engineers over the years — never really stopped.</p>
+      </div>
+      <div class="interest-item">
+        <span class="ico">📷</span>
+        <h3>Photography</h3>
+        <p>Always got a camera within reach. Half my camera roll is skylines, the other half is probably a plate I was about to eat.</p>
+      </div>
+      <div class="interest-item">
+        <span class="ico">👨‍🍳</span>
+        <h3>Chef hat mode</h3>
+        <p>Cooking, but let's call it what it really is — putting on the chef hat and hoping for the best. Latest release: biryani (v1, still in beta).</p>
+      </div>
+    </div>
+
+    <div class="gallery-head">
+      <h3>A few frames</h3>
+      <span>photography &amp; chef-hat experiments</span>
+    </div>
+    <div class="gallery">
+      <div class="frame filled">
+        <img src="images/photography/saraswati-idol.jpg" alt="Unpainted clay idol of Saraswati mid-sculpting, lit against a dark background with coloured powder">
+      </div>
+      <div class="frame filled">
+        <img src="images/cooking/pithe-platter.png" alt="A plate of Bengali pithe dumplings with an assortment of chutneys and sweets">
+      </div>
+      <div class="frame filled">
+        <img src="images/photography/amber-clock.jpg" alt="A quartz clock lit in a warm amber glow, shot at a low angle against a dark, blurred background">
+      </div>
+      <div class="frame filled">
+        <img src="images/cooking/mangsho-bhaat.jpg" alt="Close-up of a mangsho-bhaat plate with egg, meat, potato, and fried sev garnish">
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="status"><span class="dot"></span>work in progress — more sections landing soon</span>
+    <a href="https://github.com/Kushal-Sen" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      github.com/Kushal-Sen
+    </a>
+  </footer>
+</main>
+
+<script>
+  (function(){
+    var card = document.getElementById('about');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !card) return;
+
+    card.addEventListener('mousemove', function(e){
+      var r = card.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - 0.5;
+      var y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = 'perspective(900px) rotateY(' + (x * 4) + 'deg) rotateX(' + (y * -4) + 'deg)';
+    });
+    card.addEventListener('mouseleave', function(){
+      card.style.transform = 'perspective(900px) rotateY(0deg) rotateX(0deg)';
+    });
+  })();
+</script>
+
+</body>
+</html>
