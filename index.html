@@ -20,7 +20,7 @@
 <meta name="twitter:image" content="https://kushal-sen.github.io/images/og-preview.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg: #120A2A;
@@ -316,6 +316,88 @@
   }
   .frame.filled:hover img{ transform: scale(1.06); }
 
+  /* ---- checklist ---- */
+  .scatter-board{
+    position: relative;
+    min-height: 230px;
+    margin-top: 8px;
+    background-image: radial-gradient(rgba(255,255,255,0.07) 1.5px, transparent 1.5px);
+    background-size: 18px 18px;
+    border-radius: var(--radius-md);
+  }
+  .sticker{
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 18px 10px 12px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid var(--card-border);
+    border-radius: 9px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    transform: rotate(var(--rot));
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    cursor: default;
+  }
+  .sticker:hover{
+    transform: rotate(0deg) scale(1.07);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.45);
+    z-index: 5;
+  }
+  .sticker::before{
+    content: '';
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    width: 36px;
+    height: 14px;
+    background: rgba(255,202,92,0.55);
+    border-radius: 2px;
+    transform: translateX(-50%) rotate(-5deg);
+  }
+  .sticker .check{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--violet));
+    color: #0c0820;
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    flex: 0 0 auto;
+  }
+  .sticker .label{
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .sticker.pending .check{
+    background: none;
+    border: 2px solid var(--ink-faint);
+  }
+  @media (max-width: 640px){
+    .scatter-board{
+      position: static;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+      background: none;
+      padding: 4px 0;
+    }
+    .sticker{ position: static; transform: none !important; width: 100%; }
+    .sticker:hover{ transform: none !important; }
+    .sticker .label{ white-space: normal; }
+  }
+
   /* ---- footer ---- */
   footer{
     margin-top: 48px;
@@ -441,6 +523,12 @@
     </div>
   </section>
 
+  <section class="card" id="checklist">
+    <p class="eyebrow">Checklist</p>
+    <h2>Stuff I've actually gone and done</h2>
+    <div class="scatter-board" id="scatterBoard"></div>
+  </section>
+
   <footer>
     <span class="status"><span class="dot"></span>work in progress — more sections landing soon</span>
     <div class="footer-links">
@@ -471,6 +559,76 @@
     card.addEventListener('mouseleave', function(){
       card.style.transform = 'perspective(900px) rotateY(0deg) rotateX(0deg)';
     });
+  })();
+</script>
+
+<script>
+  (function(){
+    var board = document.getElementById('scatterBoard');
+    if (!board) return;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function seeded(i, salt){
+      var x = Math.sin(i * 12.9898 + salt * 78.233) * 43758.5453;
+      return x - Math.floor(x); // 0..1, stable per (i, salt)
+    }
+
+    function parseCSV(text){
+      var lines = text.trim().split('\n').slice(1); // drop header
+      return lines.filter(function(l){ return l.trim(); }).map(function(line){
+        var parts = line.split(',');
+        return { name: parts[0].trim(), done: parts[1].trim().toLowerCase() === 'true' };
+      });
+    }
+
+    function render(items){
+      board.innerHTML = '';
+      var isNarrow = window.innerWidth <= 640;
+      var cellW = 210, cellH = 76;
+      var boardW = board.clientWidth || 700;
+      var cols = Math.max(1, Math.floor(boardW / cellW));
+
+      items.forEach(function(item, i){
+        var el = document.createElement('span');
+        el.className = 'sticker' + (item.done ? '' : ' pending');
+
+        var check = document.createElement('span');
+        check.className = 'check';
+        check.textContent = item.done ? '✓' : '';
+        var label = document.createElement('span');
+        label.className = 'label';
+        label.textContent = item.name;
+        el.appendChild(check);
+        el.appendChild(label);
+
+        if (!isNarrow && !reduce){
+          var col = i % cols, row = Math.floor(i / cols);
+          var jitterX = (seeded(i, 1) - 0.5) * 26;
+          var jitterY = (seeded(i, 2) - 0.5) * 18;
+          var rot = (seeded(i, 3) - 0.5) * 16;
+          el.style.setProperty('--x', (col * cellW + jitterX) + 'px');
+          el.style.setProperty('--y', (row * cellH + jitterY) + 'px');
+          el.style.setProperty('--rot', rot + 'deg');
+        }
+        board.appendChild(el);
+      });
+
+      if (!isNarrow && !reduce){
+        var rows = Math.ceil(items.length / cols);
+        board.style.height = (rows * cellH + 50) + 'px';
+      } else {
+        board.style.height = 'auto';
+      }
+    }
+
+    fetch('checklist.csv')
+      .then(function(r){ return r.text(); })
+      .then(function(text){
+        var items = parseCSV(text);
+        render(items);
+        window.addEventListener('resize', function(){ render(items); });
+      })
+      .catch(function(){ board.textContent = 'Couldn’t load checklist.csv'; });
   })();
 </script>
 
